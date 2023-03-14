@@ -1,0 +1,154 @@
+"--------------------------------------------------
+" 1.Set up vim-plug:
+"   curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+" 2.Install Plugins:
+"   Launch vim and run :PlugInstall
+"
+" vim-plug setting
+"--------------------------------------------------
+call plug#begin('~/.vim/plugged')
+" The default plugin directory will be as follows:
+"   - Vim (Linux/macOS): '~/.vim/plugged'
+
+Plug 'ludovicchabant/vim-gutentags'
+
+Plug 'Yggdroot/LeaderF', { 'do': ':LeaderfInstallCExtension' }
+
+Plug 'Valloric/YouCompleteMe'
+
+Plug 'mhinz/vim-signify', { 'tag': 'legacy' }
+
+Plug 'kana/vim-textobj-user'
+Plug 'kana/vim-textobj-indent'
+Plug 'kana/vim-textobj-syntax'
+Plug 'kana/vim-textobj-function', { 'for':['c', 'cpp', 'vim'] }
+Plug 'sgur/vim-textobj-parameter'
+
+Plug 'dense-analysis/ale'
+
+Plug 'octol/vim-cpp-enhanced-highlight'
+
+Plug 'scrooloose/nerdtree'
+
+
+" Initialize plugin system
+" - Automatically executes `filetype plugin indent on` and `syntax enable`.
+call plug#end()
+" You can revert the settings after the call like so:
+"   filetype indent off   " Disable file-type-specific indentation
+"   syntax off            " Disable syntax highlighting
+
+"----------------------------------------------------------------------
+" core initialize
+"----------------------------------------------------------------------
+" You want Vim, not vi. When Vim finds a vimrc, 'nocompatible' is set anyway.
+" We set it explicitely to make our position clear!
+set nocompatible
+
+filetype plugin indent on  " Load plugins according to detected filetype.
+syntax on                  " Enable syntax highlighting.
+
+" indent settings
+set autoindent             " Indent according to previous line.
+" set expandtab              " Use spaces instead of tabs.
+set noexpandtab
+set softtabstop =8         " Tab key indents by 4 spaces.
+set shiftwidth  =8         " >> indents by 4 spaces.
+set shiftround             " >> indents to next multiple of 'shiftwidth'.
+
+" display settings
+set showmode               " Show current mode in command-line.
+set display     =lastline  " Show as much as possible of the last line.
+set laststatus  =2         " Always show statusline.
+set nu!                    " dispaly the line numbers
+
+" better navigation
+set incsearch              " Highlight while searching with / or ?.
+set hlsearch               " Keep matches highlighted.
+set cursorline             " Find the current line quickly.
+set report      =0         " Always report changed lines.
+
+" misc settings
+set splitbelow             " Open new windows below the current window.
+set splitright             " Open new windows right of the current window.
+
+
+
+set tags=./.tags;,.tags
+
+" warned whenever text exceeds 80 columns
+:au BufWinEnter * let w:m1=matchadd('Search', '\%<81v.\%>81v', -1)
+:au BufWinEnter * let w:m2=matchadd('ErrorMsg', '\%>80v.\+', -1)
+
+"----------------------------------------------------------------------
+" gutentags
+"----------------------------------------------------------------------
+" gutentags 搜索工程目录的标志，碰到这些文件/目录名就停止向上一级目录递归
+let g:gutentags_project_root = ['.git']
+" 所生成的数据文件的名称
+let g:gutentags_ctags_tagfile = '.tags'
+
+" let g:gutentags_modules = ['ctags', 'gtags_cscope']
+" 将自动生成的 tags 文件全部放入 ~/.cache/tags 目录中，避免污染工程目录
+if exists('g:gutentags_cache_dir') == 0
+	let g:gutentags_cache_dir = expand('~/.cache/tags')
+endif
+
+if !isdirectory(g:gutentags_cache_dir)
+	call mkdir(g:gutentags_cache_dir, 'p')
+endif
+
+" 配置 ctags 的参数
+let g:gutentags_ctags_extra_args = []
+let g:gutentags_ctags_extra_args = ['--fields=+niazS', '--extra=+q']
+let g:gutentags_ctags_extra_args += ['--c++-kinds=+px']
+let g:gutentags_ctags_extra_args += ['--c-kinds=+px']
+
+" let g:gutentags_auto_add_gtags_cscope = 0
+" let g:gutentags_define_advanced_commands = 1
+" let g:gutentags_define_advanced_commands = 1
+" let g:gutentags_plus_switch = 0
+
+"----------------------------------------------------------------------
+" ale
+"----------------------------------------------------------------------
+let g:ale_linters_explicit = 1
+let g:ale_completion_delay = 500
+let g:ale_echo_delay = 100
+let g:ale_lint_delay = 1000
+let g:ale_echo_msg_format = '[%linter%] %code: %%s [%severity%]'
+let g:ale_lint_on_text_changed = 'normal'
+let g:ale_lint_on_insert_leave = 1
+let g:ale_virtualtext_cursor = 0
+
+"----------------------------------------------------------------------
+" vim-cpp-enhanced-highlight
+"----------------------------------------------------------------------
+let g:cpp_member_variable_highlight = 1
+let g:cpp_class_decl_highlight = 1
+let g:cpp_concepts_highlight = 1
+let g:cpp_posix_standard = 1
+
+"----------------------------------------------------------------------
+" nerdtree
+"----------------------------------------------------------------------
+let NERDTreeIgnore=['\.pyc$'] " ignore files in NERDTree
+let NERDTreeWinPos='right'   " nerdtree locate at right side
+let NERDTreeShowBookmarks = 1
+" Open NERDTree with F2
+map <F2> :NERDTreeToggle<cr>
+" Close vim if the only window left open is a NERDTree
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+" Open a NERDTree automatically when vim starts up
+autocmd vimenter * NERDTree
+autocmd vimenter * wincmd p  " focus main windows on launch
+
+"----------------------------------------------------------------------
+" LeaderF
+"----------------------------------------------------------------------
+" don't show the help in normal mode
+let g:Lf_HideHelp = 1
+let g:Lf_UseCache = 0
+let g:Lf_UseVersionControlTool = 0
+let g:Lf_IgnoreCurrentBufferName = 1
+
